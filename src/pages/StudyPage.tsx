@@ -16,7 +16,6 @@ function StudyPage() {
   const [userAnswer, setUserAnswer] = useState("");
   const [quizResult, setQuizResult] = useState("");
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
-  const [phonetic, setPhonetic] = useState("");
 
   useEffect(() => {
     const fetchTodayWords = async () => {
@@ -126,49 +125,17 @@ function StudyPage() {
     setIsAnswerCorrect(false);
   };
 
-  const speakWord = (word: string) => {
-    if (!word) return;
+  const playAudio = () => {
+    const audioUrl = vocabularies[currentIndex]?.audio_url;
 
-    const utterance = new SpeechSynthesisUtterance(word);
-
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const fetchPhonetic = async (word: string) => {
-    try {
-      const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-      );
-
-      const data = await response.json();
-
-      const ipa =
-        data?.[0]?.phonetic ||
-        data?.[0]?.phonetics?.find((item: { text?: string }) => item.text)
-          ?.text ||
-        "";
-
-      setPhonetic(ipa);
-    } catch (error) {
-      console.error(error);
-      setPhonetic("");
+    if (!audioUrl) {
+      alert("Từ này chưa có file phát âm.");
+      return;
     }
+
+    const audio = new Audio(audioUrl);
+    audio.play();
   };
-
-  useEffect(() => {
-    const loadPhonetic = async () => {
-      if (vocabularies.length === 0) return;
-
-      await fetchPhonetic(vocabularies[currentIndex]?.english);
-    };
-
-    loadPhonetic();
-  }, [currentIndex, vocabularies]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -193,17 +160,25 @@ function StudyPage() {
                 {vocabularies[currentIndex]?.english}
               </h2>
 
-              {phonetic && (
-                <p className="mt-2 text-xl text-gray-500">{phonetic}</p>
-              )}
-
               <button
-                onClick={() => speakWord(vocabularies[currentIndex]?.english)}
+                onClick={playAudio}
                 className="rounded-full bg-blue-100 p-3 hover:bg-blue-200"
               >
                 🔊
               </button>
             </div>
+
+            {vocabularies[currentIndex]?.part_of_speech && (
+              <span className="mt-2 rounded bg-blue-100 px-3 py-1 text-sm text-blue-700">
+                {vocabularies[currentIndex].part_of_speech}
+              </span>
+            )}
+
+            {vocabularies[currentIndex]?.phonetic && (
+              <p className="mt-2 text-xl text-gray-500">
+                {vocabularies[currentIndex].phonetic}
+              </p>
+            )}
 
             <div className="mt-8">
               <input

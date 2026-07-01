@@ -6,7 +6,10 @@ export const addVocabulary = async (
   english: string,
   vietnamese: string,
   category: string,
-  example?: string,
+  example: string,
+  phonetic: string,
+  partOfSpeech: string,
+  audioUrl: string,
 ) => {
   const { data, error } = await supabase
     .from("vocabularies")
@@ -17,6 +20,9 @@ export const addVocabulary = async (
         vietnamese,
         category,
         example,
+        phonetic,
+        part_of_speech: partOfSpeech,
+        audio_url: audioUrl,
       },
     ])
     .select();

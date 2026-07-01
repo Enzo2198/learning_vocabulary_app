@@ -11,6 +11,48 @@ function AddWordPage() {
   const [example, setExample] = useState("");
   const [category, setCategory] = useState("");
 
+  const fetchWordInfo = async (word: string) => {
+    try {
+      const response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
+      );
+
+      if (!response.ok) {
+        return {
+          phonetic: "",
+          partOfSpeech: "",
+          audioUrl: "",
+        };
+      }
+
+      const data = await response.json();
+
+      const phonetic =
+        data?.[0]?.phonetic ||
+        data?.[0]?.phonetics?.find((item: { text?: string }) => item.text)
+          ?.text ||
+        "";
+
+      const partOfSpeech = data?.[0]?.meanings?.[0]?.partOfSpeech || "";
+
+      const audioUrl =
+        data?.[0]?.phonetics?.find((item: { audio?: string }) => item.audio)
+          ?.audio || "";
+
+      return {
+        phonetic,
+        partOfSpeech,
+        audioUrl,
+      };
+    } catch {
+      return {
+        phonetic: "",
+        partOfSpeech: "",
+        audioUrl: "",
+      };
+    }
+  };
+
   const handleSubmit = async () => {
     if (!user) return;
 
@@ -19,12 +61,17 @@ function AddWordPage() {
       return;
     }
 
+    const wordInfo = await fetchWordInfo(english);
+
     const { error } = await addVocabulary(
       user.id,
       english,
       vietnamese,
       category,
       example,
+      wordInfo.phonetic,
+      wordInfo.partOfSpeech,
+      wordInfo.audioUrl,
     );
 
     if (error) {

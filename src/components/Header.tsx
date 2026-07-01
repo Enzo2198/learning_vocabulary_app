@@ -20,26 +20,29 @@ function Header({ showBackButton = true }: HeaderProps) {
   };
 
   return (
-    <header className="mb-8 flex items-center justify-between rounded-xl bg-white p-4 shadow">
-      <div className="w-32">
+    <header className="mb-6 flex items-center justify-between rounded-xl bg-white px-3 py-3 shadow sm:px-5">
+      <div className="flex w-20 justify-start sm:w-32">
         {showBackButton && (
           <button
             onClick={() => navigate(-1)}
-            className="rounded bg-gray-200 px-4 py-2 hover:bg-gray-300"
+            className="rounded bg-gray-200 px-2 py-1 text-sm hover:bg-gray-300 sm:px-4 sm:py-2 sm:text-base"
           >
-            ← Quay lại
+            ←<span className="ml-1 hidden sm:inline">Quay lại</span>
           </button>
         )}
       </div>
 
-      <h1 className="text-2xl font-bold">📚 Spaced Repetition</h1>
+      <h1 className="truncate px-2 text-center text-lg font-bold sm:text-2xl">
+        📚 Spaced Repetition
+      </h1>
 
-      <div className="w-32 flex justify-end">
+      <div className="flex w-20 justify-end sm:w-32">
         <button
           onClick={handleLogout}
-          className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+          className="rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-600 sm:px-4 sm:py-2 sm:text-base"
         >
-          Đăng xuất
+          <span className="sm:hidden">🚪</span>
+          <span className="hidden sm:inline">Đăng xuất</span>
         </button>
       </div>
     </header>
