@@ -37,11 +37,20 @@ function StudyPage() {
     fetchTodayWords();
   }, [user]);
 
+  const normalizeVietnamese = (text: string) => {
+    return text
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // bỏ dấu
+      .replace(/đ/g, "d");
+  };
+
   const checkAnswer = () => {
     const correctAnswer = vocabularies[currentIndex]?.vietnamese || "";
 
     const isCorrect =
-      userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+      normalizeVietnamese(userAnswer) === normalizeVietnamese(correctAnswer);
 
     setShowAnswer(true);
 
@@ -171,18 +180,6 @@ function StudyPage() {
           {vocabularies.length > 0
             ? `Từ ${currentIndex + 1} / ${vocabularies.length}`
             : "Không có từ cần ôn"}
-        </div>
-
-        <div className="mb-6 h-3 w-full rounded-full bg-gray-200">
-          <div
-            className="h-3 rounded-full bg-blue-500"
-            style={{
-              width:
-                vocabularies.length > 0
-                  ? `${((currentIndex + 1) / vocabularies.length) * 100}%`
-                  : "0%",
-            }}
-          />
         </div>
 
         {vocabularies.length === 0 ? (
