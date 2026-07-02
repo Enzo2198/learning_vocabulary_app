@@ -43,14 +43,13 @@ export const getVocabularies = async (userId: string) => {
 
 // Lấy danh sách từ vựng cần ôn tập hôm nay
 export const getTodayVocabularies = async (userId: string) => {
-  const today = new Date().toISOString();
+  const today = new Date().toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("vocabularies")
     .select("*")
     .eq("user_id", userId)
-    .lte("next_review_date", today)
-    .order("next_review_date", { ascending: true });
+    .lte("next_review_day", today);
 
   return { data, error };
 };
@@ -72,7 +71,7 @@ export const updateVocabularyReview = async (
       repetition,
       interval_days: intervalDays,
       ease_factor: easeFactor,
-      next_review_date: nextReviewDate.toISOString(),
+      next_review_day: nextReviewDate.toISOString().split("T")[0],
     })
     .eq("id", vocabularyId);
 
@@ -81,29 +80,32 @@ export const updateVocabularyReview = async (
 
 // Lấy số liệu thống kê từ vựng
 export async function getStatistics(userId: string) {
-  const today = new Date().toISOString();
+  const today = new Date().toISOString().split("T")[0];
 
-  const { count: totalWords, error: totalError } = await supabase
-    .from("vocabularies")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId);
+  const [totalResult, reviewResult, rememberedResult] = await Promise.all([
+    supabase
+      .from("vocabularies")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId),
 
-  const { count: todayReviewCount, error: reviewError } = await supabase
-    .from("vocabularies")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .lte("next_review_date", today);
+    supabase
+      .from("vocabularies")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .lte("next_review_day", today),
 
-  const { count: rememberedCount, error: rememberedError } = await supabase
-    .from("vocabularies")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .gte("repetition", 5);
+    supabase
+      .from("vocabularies")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("repetition", 5),
+  ]);
 
   return {
-    totalWords: totalError ? 0 : totalWords,
-    todayReviewCount: reviewError ? 0 : todayReviewCount,
-    rememberedCount: rememberedError ? 0 : rememberedCount,
+    totalWords: totalResult.count ?? 0,
+    reviewTodayCount: reviewResult.count ?? 0,
+    rememberedCount: rememberedResult.count ?? 0,
+    error: totalResult.error || reviewResult.error || rememberedResult.error,
   };
 }
 

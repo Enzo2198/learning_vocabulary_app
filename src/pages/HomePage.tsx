@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import {
   getVocabularies,
   deleteVocabulary,
+  getStatistics,
 } from "../services/vocabulary.service";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -16,6 +17,11 @@ function HomePage() {
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const [vocabularies, setVocabularies] = useState<any[]>([]);
+  const [statistics, setStatistics] = useState({
+    totalWords: 0,
+    reviewTodayCount: 0,
+    rememberedCount: 0,
+  });
 
   useEffect(() => {
     const fetchVocabularies = async () => {
@@ -29,6 +35,16 @@ function HomePage() {
       }
 
       setVocabularies(data || []);
+
+      const stats = await getStatistics(user.id);
+
+      if (!stats.error) {
+        setStatistics({
+          totalWords: stats.totalWords,
+          reviewTodayCount: stats.reviewTodayCount,
+          rememberedCount: stats.rememberedCount,
+        });
+      }
     };
 
     fetchVocabularies();
@@ -82,7 +98,9 @@ function HomePage() {
     );
 
   // Hàm tính toán số ngày còn lại để ôn tập từ vựng
-  const getReviewText = (date: string) => {
+  const getReviewText = (date: string | null) => {
+    if (!date) return "-";
+
     const reviewDate = new Date(date);
     const today = new Date();
 
@@ -97,16 +115,6 @@ function HomePage() {
 
     return `Còn ${diffDays} ngày`;
   };
-
-  const today = new Date();
-
-  const reviewTodayCount = vocabularies.filter(
-    (vocab) => new Date(vocab.next_review_date) <= today,
-  ).length;
-
-  const rememberedCount = vocabularies.filter(
-    (vocab) => vocab.repetition >= 5,
-  ).length;
 
   const getLevel = (repetition: number) => {
     if (repetition >= 5)
@@ -263,7 +271,7 @@ function HomePage() {
                         </p>
 
                         <p className="mt-2 text-sm font-medium text-blue-600">
-                          🔁 Ôn lại: {getReviewText(vocab.next_review_date)}
+                          🔁 Ôn lại: {getReviewText(vocab.next_review_day)}
                         </p>
                       </div>
                     </div>
@@ -291,17 +299,21 @@ function HomePage() {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="rounded-xl bg-blue-100 p-6 text-center">
               <h3 className="text-lg font-semibold">Tổng số từ</h3>
-              <p className="mt-2 text-4xl font-bold">{vocabularies.length}</p>
+              <p className="mt-2 text-4xl font-bold">{statistics.totalWords}</p>
             </div>
 
             <div className="rounded-xl bg-yellow-100 p-6 text-center">
               <h3 className="text-lg font-semibold">Cần ôn hôm nay</h3>
-              <p className="mt-2 text-4xl font-bold">{reviewTodayCount}</p>
+              <p className="mt-2 text-4xl font-bold">
+                {statistics.reviewTodayCount}
+              </p>
             </div>
 
             <div className="rounded-xl bg-green-100 p-6 text-center">
               <h3 className="text-lg font-semibold">Đã nhớ</h3>
-              <p className="mt-2 text-4xl font-bold">{rememberedCount}</p>
+              <p className="mt-2 text-4xl font-bold">
+                {statistics.rememberedCount}
+              </p>
             </div>
           </div>
         </div>
