@@ -24,7 +24,7 @@ function StatisticsPage() {
 
   const [stats, setStats] = useState({
     totalWords: 0,
-    todayReviewCount: 0,
+    reviewTodayCount: 0,
     rememberedCount: 0,
   });
 
@@ -58,7 +58,7 @@ function StatisticsPage() {
 
       setStats({
         totalWords: data.totalWords || 0,
-        todayReviewCount: data.todayReviewCount || 0,
+        reviewTodayCount: data.reviewTodayCount || 0,
         rememberedCount: data.rememberedCount || 0,
       });
 
@@ -88,7 +88,7 @@ function StatisticsPage() {
 
           <div className="rounded-xl bg-white p-6 text-center shadow">
             <h2 className="text-xl font-semibold">Cần ôn hôm nay</h2>
-            <p className="mt-4 text-5xl font-bold">{stats.todayReviewCount}</p>
+            <p className="mt-4 text-5xl font-bold">{stats.reviewTodayCount}</p>
           </div>
 
           <div className="rounded-xl bg-white p-6 text-center shadow">
