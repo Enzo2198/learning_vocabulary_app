@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { addVocabulary } from "../services/vocabulary.service";
+import {
+  addVocabulary,
+  checkVocabularyExists,
+} from "../services/vocabulary.service";
 import Header from "../components/Header";
 
 function AddWordPage() {
@@ -10,6 +13,8 @@ function AddWordPage() {
   const [vietnamese, setVietnamese] = useState("");
   const [example, setExample] = useState("");
   const [category, setCategory] = useState("");
+
+  const englishInputRef = useRef<HTMLInputElement>(null);
 
   const fetchWordInfo = async (word: string) => {
     try {
@@ -61,6 +66,24 @@ function AddWordPage() {
       return;
     }
 
+    const { exists, error: checkError } = await checkVocabularyExists(
+      user.id,
+      english,
+    );
+
+    if (checkError) {
+      alert(checkError.message);
+      return;
+    }
+
+    if (exists) {
+      alert("Từ này đã tồn tại.");
+
+      englishInputRef.current?.focus();
+
+      return;
+    }
+
     const wordInfo = await fetchWordInfo(english);
 
     const { error } = await addVocabulary(
@@ -85,6 +108,10 @@ function AddWordPage() {
     setVietnamese("");
     setCategory("");
     setExample("");
+
+    setTimeout(() => {
+      englishInputRef.current?.focus();
+    }, 0);
   };
 
   return (
@@ -95,6 +122,7 @@ function AddWordPage() {
           <h1 className="mb-6 text-center text-2xl font-bold">Thêm từ mới</h1>
 
           <input
+            ref={englishInputRef}
             type="text"
             placeholder="Từ tiếng Anh"
             value={english}

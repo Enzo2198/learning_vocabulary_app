@@ -170,3 +170,18 @@ export async function getCategoryStatistics(userId: string) {
     total,
   }));
 }
+
+// Kiểm tra từ đã tồn tại
+export async function checkVocabularyExists(userId: string, english: string) {
+  const { data, error } = await supabase
+    .from("vocabularies")
+    .select("id")
+    .eq("user_id", userId)
+    .ilike("english", english.trim())
+    .maybeSingle();
+
+  return {
+    exists: !!data,
+    error,
+  };
+}
