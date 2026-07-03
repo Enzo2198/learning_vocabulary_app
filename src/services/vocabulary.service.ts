@@ -23,6 +23,11 @@ export const addVocabulary = async (
         phonetic,
         part_of_speech: partOfSpeech,
         audio_url: audioUrl,
+
+        repetition: 0,
+        interval_days: 0,
+        ease_factor: 2.5,
+        next_review_day: new Date().toISOString().split("T")[0],
       },
     ])
     .select();
