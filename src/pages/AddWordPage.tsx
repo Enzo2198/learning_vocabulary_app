@@ -106,7 +106,7 @@ function AddWordPage() {
 
     setEnglish("");
     setVietnamese("");
-    setCategory("");
+    // setCategory("");
     setExample("");
 
     setTimeout(() => {
