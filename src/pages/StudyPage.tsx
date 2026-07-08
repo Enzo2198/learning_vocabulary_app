@@ -74,7 +74,7 @@ function StudyPage() {
     switch (quality) {
       case "forgot":
         repetition = 0;
-        intervalDays = 1;
+        intervalDays = 0;
         easeFactor = Math.max(1.3, easeFactor - 0.2);
         break;
 
@@ -108,14 +108,34 @@ function StudyPage() {
       return;
     }
 
-    const remainingWords = vocabularies.filter(
-      (_, index) => index !== currentIndex,
-    );
+    if (quality === "forgot") {
+      const updatedWord = {
+        ...currentWord,
+        repetition,
+        interval_days: intervalDays,
+        ease_factor: easeFactor,
+      };
 
-    setVocabularies(remainingWords);
+      const newList = [...vocabularies];
 
-    if (remainingWords.length === 0) {
-      alert("🎉 Bạn đã hoàn thành buổi học hôm nay!");
+      newList.splice(currentIndex, 1);
+
+      // After 4 words repeat
+      const insertIndex = Math.min(4, newList.length);
+
+      newList.splice(insertIndex, 0, updatedWord);
+
+      setVocabularies(newList);
+    } else {
+      const remainingWords = vocabularies.filter(
+        (_, index) => index !== currentIndex,
+      );
+
+      setVocabularies(remainingWords);
+
+      if (remainingWords.length === 0) {
+        alert("🎉 Bạn đã hoàn thành buổi học hôm nay!");
+      }
     }
 
     setCurrentIndex(0);
